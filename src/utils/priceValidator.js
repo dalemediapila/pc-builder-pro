@@ -33,10 +33,11 @@ export const filterHardGamersPrices=filterPriceOutliers
 export function getPriceWarning(category,item,currentArs,arsPerUsd){
   if(!item)return false
   const baseUsd=Number(item.price)
-  const enteredUsd=Number(currentArs)/Number(arsPerUsd)
+  const baseArs=Number(item.priceArs??baseUsd*Number(arsPerUsd))
   const [min,max]=PRICE_RANGES_USD[category]||[0,Infinity]
   const outsideCategory=!Number.isFinite(baseUsd)||baseUsd<min||baseUsd>max
-  const editedOutlier=Number.isFinite(enteredUsd)&&baseUsd>0&&(enteredUsd<baseUsd*.65||enteredUsd>baseUsd*1.35)
+  const enteredArs=Number(currentArs)
+  const editedOutlier=Number.isFinite(enteredArs)&&baseArs>0&&(enteredArs<baseArs*.65||enteredArs>baseArs*1.35)
   const limited=LIMITED_PATTERNS.some(pattern=>pattern.test(item.name||''))
   return outsideCategory||editedOutlier||limited
 }

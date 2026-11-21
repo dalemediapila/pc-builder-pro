@@ -1,5 +1,6 @@
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000
-const cacheKey = (provinceId, componentId) => `pcbp-live-price:${provinceId}:${componentId}`
+const CACHE_VERSION = 'v2'
+const cacheKey = (provinceId, componentId) => `pcbp-live-price:${CACHE_VERSION}:${provinceId}:${componentId}`
 const inFlight = new Map()
 
 export function readCachedComponentPrice(provinceId, componentId) {

@@ -95,6 +95,30 @@ function median(values) {
   return ordered.length % 2 ? ordered[mid] : (ordered[mid - 1] + ordered[mid]) / 2
 }
 
+async function hardGamersReference(searchKey, basePriceArs) {
+  const store = nationalStores.find(item => item.name === 'HardGamers')
+  if (!store) return null
+  const searchUrl = searchStoreUrl(store, searchKey)
+  try {
+    const products = await request(searchUrl, AbortSignal.timeout(TIMEOUT_MS))
+    const seen = new Set()
+    const firstValid = products.filter(item => item.stock && item.price && matchesModel(item.title, searchKey))
+      .filter(item => item.price >= basePriceArs * 0.65 && item.price <= basePriceArs * 1.45)
+      .filter(item => { const key = `${normalize(item.title)}|${item.url || ''}`; if (seen.has(key)) return false; seen.add(key); return true })
+      .slice(0, 9)
+    const referencePrice = median(firstValid.map(item => item.price))
+    if (referencePrice === null) return null
+    return {
+      referencePrice,
+      storeBreakdown: firstValid.map((item, index) => ({
+        storeName: `HardGamers · resultado ${index + 1}`,
+        priceArs: item.price,
+        url: item.url || searchUrl,
+      })),
+    }
+  } catch { return null }
+}
+
 export async function handler(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' }
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' }
@@ -106,8 +130,26 @@ export async function handler(event) {
     const localStores = region.localStores
     const localOffers = (await Promise.all(localStores.map(store => offersForStore(store, searchKey, base)))).filter(Boolean)
     let nationalOffers = []
+    let hardGamersResult = null
     if (localOffers.length < 2) {
-      nationalOffers = (await Promise.all(nationalStores.map(store => offersForStore({ ...store, local: false }, searchKey, base)))).filter(Boolean)
+      const [nationalResults, reference] = await Promise.all([
+        Promise.all(nationalStores.map(store => offersForStore({ ...store, local: false }, searchKey, base))),
+        localOffers.length === 0 ? hardGamersReference(searchKey, base) : Promise.resolve(null),
+      ])
+      nationalOffers = nationalResults.filter(Boolean)
+      hardGamersResult = reference
+    }
+    if (localOffers.length === 0 && hardGamersResult) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        body: JSON.stringify({
+          componentId, category, provinceId: region.id, province: region.label,
+          averagePriceArs: hardGamersResult.referencePrice,
+          storeBreakdown: hardGamersResult.storeBreakdown,
+          sourceType: 'hardgamers_fallback', updatedAt: new Date().toISOString(),
+        }),
+      }
     }
     const uniqueStores = new Map()
     for (const offer of [...localOffers, ...nationalOffers]) if (!uniqueStores.has(offer.storeName)) uniqueStores.set(offer.storeName, offer)
