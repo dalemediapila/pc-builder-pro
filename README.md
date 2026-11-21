@@ -6,7 +6,7 @@ El catálogo contiene entre 14 y 16 opciones por categoría. Cada artículo tien
 
 La navegación incluye seis PCs recomendadas verificadas contra el motor de compatibilidad, comparación lado a lado de hasta tres armados y enlaces de búsqueda por tienda para cada pieza seleccionada. Los enlaces de búsqueda se pueden incluir al copiar el resumen o imprimirlo.
 
-El catálogo guarda precios de respaldo ARS por modelo y sus referencias USD. La consulta Netlify prioriza las tiendas virtuales provinciales; si no encuentra ofertas locales legibles, usa la mediana de los primeros resultados válidos de HardGamers y marca ese origen en la tarjeta. La caché de precios está versionada (`v2`) para descartar valores anteriores.
+El catálogo guarda precios de respaldo ARS por modelo y sus referencias USD. La consulta Netlify valida tokens del modelo, descarta cuotas y accesorios, y calcula medianas robustas con tolerancia del 30%. Primero consulta las tiendas provinciales; si no hay precio local legible, compara HardGamers con Compra Gamer. Los resultados muestran producto, tienda, precio y enlace; cuando no hay datos verificables se conserva el precio estimado del catálogo con una insignia naranja. La caché versionada (`v4_real_market`) descarta resultados anteriores.
 
 Los precios base del catálogo se calibraron con referencias de mercado local publicadas en Mendoza: refrigeraciones AIO 240mm alrededor de ARS 155.000, AIO 360mm alrededor de ARS 180.000 y las demás categorías con bandas locales equivalentes. `priceArs` conserva esa referencia inicial; `price` guarda su equivalente USD a la cotización base configurable, de modo que el armador, las recomendaciones y la comparación recalculan sus importes desde el mismo catálogo.
 
