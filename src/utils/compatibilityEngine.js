@@ -4,6 +4,7 @@ export function evaluateCompatibility(build) {
   const {cpu, cooler, motherboard, ram, gpu, psu, case: pcCase} = build
   if (cpu && motherboard && cpu.socket !== motherboard.socket) add('critical','Socket incompatible',`${cpu.name} usa ${cpu.socket}; ${motherboard.name} usa ${motherboard.socket}.`)
   if (cpu && cooler && !(cooler.compatibleSockets || []).includes(cpu.socket)) add('critical','Socket de cooler incompatible',`${cooler.name} no es compatible con ${cpu.socket}.`)
+  if (gpu?.integrated && !cpu?.hasIntegratedGraphics) add('critical','Gráficos integrados no disponibles','La opción iGPU requiere un procesador con gráficos integrados. Elegí un CPU compatible o una placa de video dedicada.')
   if(cpu&&cooler?.stock&&(!cpu.stockCoolerName||cpu.stockCoolerName!==cooler.name)) add('critical','Cooler stock no corresponde',`${cpu.name} no incluye ${cooler.name} de fábrica. Elegí el cooler incluido correcto o uno dedicado.`)
   if (motherboard && ram && motherboard.ramType !== ram.type) add('critical','Memoria incompatible',`La placa requiere ${motherboard.ramType} y elegiste ${ram.type}.`)
   if (motherboard && ram && ram.modules > motherboard.ramSlots) add('critical','Slots insuficientes',`La RAM usa ${ram.modules} módulos y la placa tiene ${motherboard.ramSlots} slots.`)
