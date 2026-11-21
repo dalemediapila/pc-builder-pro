@@ -18,10 +18,12 @@ Desde una terminal, entrá a la carpeta del proyecto y ejecutá:
 
 ```bash
 npm install
-npm run dev
+npx netlify dev
 ```
 
-Vite mostrará la dirección local (normalmente `http://localhost:5173`). Para generar una compilación de producción:
+Netlify CLI sirve Vite y `/.netlify/functions/fetch-prices` en el mismo origen para que la consulta automática funcione también en desarrollo. La caché de precios por provincia y componente dura seis horas. En producción, Netlify detecta `netlify.toml` y publica la función junto con la compilación.
+
+Para generar una compilación de producción:
 
 ```bash
 npm run build
